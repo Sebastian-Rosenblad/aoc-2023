@@ -11,17 +11,16 @@ function DayOne() {
     return a.map(line => findTrueCalibration(line)).reduce((a, b) => a + b, 0).toString();
   }
   function findCalibration(line: string): number {
-    const r = /\d+/g;
-    let digits = line.match(r)?.reduce((a, b) => a + b, "");
-    if (!digits) return 0;
+    const r: RegExp = /\d+/g;
+    let digits: string = line.match(r)?.reduce((a, b) => a + b, "") || "0";
     return parseInt(digits[0] + digits[digits.length - 1]);
   }
   function findTrueCalibration(line: string): number {
-    const r = /(?:one|two|three|four|five|six|seven|eight|nine|\d+)/;
+    const r: RegExp = /(?:one|two|three|four|five|six|seven|eight|nine|\d+)/;
     let first: string = line.match(r)?.map(digit => toDigit(digit))[0].slice(0, 1) || "0";
-    let i = line.length - 1;
+    let i: number = line.length - 1;
     while (!line.slice(i).match(r)) i--;
-    let last = line.slice(i).match(r)?.map(digit => toDigit(digit))[0] || "0";
+    let last: string = line.slice(i).match(r)?.map(digit => toDigit(digit))[0] || "0";
     return parseInt(first + last);
   }
   function toDigit(word: string): string {
