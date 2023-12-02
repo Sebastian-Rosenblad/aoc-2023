@@ -5,6 +5,11 @@ import { dayOneExampleOne, dayOneExampleTwo } from './example_data';
 function DayOne() {
   const data: Array<string> = dayOneData.split(/\r?\n/);
 
+  /**
+   * Part 1: time 00:10:51 - rank 5313
+   * Part 2: time 00:58:10 - rank 6612
+   */
+
   function calculate(a: Array<string>, partOne: boolean): string {
     if (partOne)
       return a.map(line => findCalibration(line)).reduce((a, b) => a + b, 0).toString();
