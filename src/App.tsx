@@ -1,11 +1,11 @@
 import React from 'react';
 import './App.scss';
-import DayThree from './days/DayThree/DayThree';
+import DayFour from './days/DayFour/DayFour';
 
 function App() {
   return (
     <div className="App">
-      <DayThree />
+      <DayFour />
     </div>
   );
 }
