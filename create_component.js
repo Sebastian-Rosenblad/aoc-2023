@@ -18,6 +18,11 @@ function ${componentName}() {
   const data: Array<string> = ${camelCase}Data.split(/\\r?\\n/);
   const exampleData: Array<string> = ${camelCase}Example.split(/\\r?\\n/);
 
+  /**
+   * Part 1: time 00:00:00 - rank 0000
+   * Part 2: time 00:00:00 - rank 0000
+   */
+
   function calculate(a: Array<string>, partOne: boolean): string {
     if (partOne)
       return "";
