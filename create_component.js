@@ -44,6 +44,6 @@ export default ${componentName};
 `;
 
   fs.writeFileSync(path.join(componentDir, `${componentName}.tsx`), componentContent);
-  fs.writeFileSync(path.join(componentDir, 'data.tsx'), `export const ${camelCase}Data:string=\`\`;`);
-  fs.writeFileSync(path.join(componentDir, 'example_data.tsx'), `export const ${camelCase}Example:string=\`\`;`);
+  fs.writeFileSync(path.join(componentDir, 'data.ts'), `export const ${camelCase}Data:string=\`\`;`);
+  fs.writeFileSync(path.join(componentDir, 'example_data.ts'), `export const ${camelCase}Example:string=\`\`;`);
 }
