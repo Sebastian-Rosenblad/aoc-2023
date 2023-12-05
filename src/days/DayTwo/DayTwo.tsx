@@ -1,4 +1,3 @@
-import './DayTwo.scss';
 import { dayTwoData } from './data';
 import { dayTwoExample } from './example_data';
 

@@ -10,8 +10,7 @@ const componentDir = `./src/days/${componentName}`;
 if (!fs.existsSync(componentDir)) {
   fs.mkdirSync(componentDir, { recursive: true });
 
-  const componentContent = `import './${componentName}.scss';
-import { ${camelCase}Data } from './data';
+  const componentContent = `import { ${camelCase}Data } from './data';
 import { ${camelCase}Example } from './example_data';
 
 function ${componentName}() {
@@ -43,11 +42,8 @@ function ${componentName}() {
 
 export default ${componentName};
 `;
-  const styleContent = `.${kebabCase} {}
-`;
 
   fs.writeFileSync(path.join(componentDir, `${componentName}.tsx`), componentContent);
-  fs.writeFileSync(path.join(componentDir, `${componentName}.scss`), styleContent);
   fs.writeFileSync(path.join(componentDir, 'data.tsx'), `export const ${camelCase}Data:string=\`\`;`);
   fs.writeFileSync(path.join(componentDir, 'example_data.tsx'), `export const ${camelCase}Example:string=\`\`;`);
 }
