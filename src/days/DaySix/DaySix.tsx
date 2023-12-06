@@ -11,8 +11,8 @@ function DaySix() {
   const exampleData: Array<string> = daySixExample.split(/\r?\n/);
 
   /**
-   * Part 1: time 00:00:00 - rank 0000
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 1: time 00:13:20 - rank 4259
+   * Part 2: time 00:16:11 - rank 3279
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
