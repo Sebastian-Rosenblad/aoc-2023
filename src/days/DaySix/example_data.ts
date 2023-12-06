@@ -1,1 +1,2 @@
-export const daySixExample:string=``;
+export const daySixExample:string=`Time:      7  15   30
+Distance:  9  40  200`;
