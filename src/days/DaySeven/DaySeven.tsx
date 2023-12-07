@@ -12,8 +12,8 @@ function DaySeven() {
   const exampleData: Array<string> = daySevenExample.split(/\r?\n/);
 
   /**
-   * Part 1: time 00:00:00 - rank 0000
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 1: time 00:45:06 - rank 4829
+   * Part 2: time 00:50:21 - rank 2762
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
@@ -32,13 +32,13 @@ function DaySeven() {
         bid: parseInt(line.split(" ")[1]),
         score: 0
       });
-    })
+    });
     return hands;
   }
   function findScore(hand: HandM): number {
     let score: string = "1";
-    const types = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
-    let amount = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+    const types: Array<string> = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+    let amount: Array<number> = [0,0,0,0,0,0,0,0,0,0,0,0,0];
     for (let i = 0; i < hand.hand.length; i++) amount[types.indexOf(hand.hand[i])] += 1;
     if (amount.includes(5)) score = "7";
     else if (amount.includes(4)) score = "6";
@@ -51,8 +51,8 @@ function DaySeven() {
   }
   function findJokerScore(hand: HandM): number {
     let score: string = "1";
-    const types = ["A","K","Q","T","9","8","7","6","5","4","3","2","J"];
-    let amount = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+    const types: Array<string> = ["A","K","Q","T","9","8","7","6","5","4","3","2","J"];
+    let amount: Array<number> = [0,0,0,0,0,0,0,0,0,0,0,0,0];
     for (let i = 0; i < hand.hand.length; i++) amount[types.indexOf(hand.hand[i])] += 1;
     let jokers: number = amount[12];
     amount[12] = 0;
