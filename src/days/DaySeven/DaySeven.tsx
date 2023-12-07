@@ -1,6 +1,12 @@
 import { daySevenData } from './data';
 import { daySevenExample } from './example_data';
 
+interface HandM {
+  hand: string;
+  bid: number;
+  score: number;
+}
+
 function DaySeven() {
   const data: Array<string> = daySevenData.split(/\r?\n/);
   const exampleData: Array<string> = daySevenExample.split(/\r?\n/);
@@ -11,9 +17,36 @@ function DaySeven() {
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
+    let hands: Array<HandM> = parse(a);
+    hands.forEach(hand => hand.score = findScore(hand));
     if (partOne)
-      return "";
+      return hands.sort((a, b) => a.score - b.score).map((hand, i) => hand.bid * (i + 1)).reduce((a, b) => a + b, 0).toString();
     return "";
+  }
+  function parse(a: Array<string>): Array<HandM> {
+    let hands: Array<HandM> = [];
+    a.forEach(line => {
+      hands.push({
+        hand: line.split(" ")[0],
+        bid: parseInt(line.split(" ")[1]),
+        score: 0
+      });
+    })
+    return hands;
+  }
+  function findScore(hand: HandM): number {
+    let score: string = "1";
+    const types = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+    let amount = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+    for (let i = 0; i < hand.hand.length; i++) amount[types.indexOf(hand.hand[i])] += 1;
+    if (amount.includes(5)) score = "7";
+    else if (amount.includes(4)) score = "6";
+    else if (amount.includes(3) && amount.includes(2)) score = "5";
+    else if (amount.includes(3)) score = "4";
+    else if (amount.filter(num => num === 2).length === 2) score = "3";
+    else if (amount.includes(2)) score = "2";
+    for (let i = 0; i < hand.hand.length; i++) score += 30 - types.indexOf(hand.hand[i]);
+    return parseInt(score);
   }
 
   return (
