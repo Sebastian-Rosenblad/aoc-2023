@@ -2,7 +2,6 @@ import { daySevenData } from './data';
 import { daySevenExample } from './example_data';
 
 interface HandM {
-  hand: string;
   bid: number;
   score: number;
 }
@@ -17,54 +16,35 @@ function DaySeven() {
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
-    let hands: Array<HandM> = parse(a);
-    hands.forEach(hand => hand.score = findScore(hand));
-    if (partOne)
-      return hands.sort((a, b) => a.score - b.score).map((hand, i) => hand.bid * (i + 1)).reduce((a, b) => a + b, 0).toString();
-    hands.forEach(hand => hand.score = findJokerScore(hand));
+    let hands: Array<HandM> = a.map(line => {
+      return {
+        bid: parseInt(line.split(" ")[1]),
+        score: findScore(line.split(" ")[0], !partOne)
+      };
+    });
     return hands.sort((a, b) => a.score - b.score).map((hand, i) => hand.bid * (i + 1)).reduce((a, b) => a + b, 0).toString();
   }
-  function parse(a: Array<string>): Array<HandM> {
-    let hands: Array<HandM> = [];
-    a.forEach(line => {
-      hands.push({
-        hand: line.split(" ")[0],
-        bid: parseInt(line.split(" ")[1]),
-        score: 0
-      });
-    });
-    return hands;
-  }
-  function findScore(hand: HandM): number {
-    let score: string = "1";
-    const types: Array<string> = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
-    let amount: Array<number> = [0,0,0,0,0,0,0,0,0,0,0,0,0];
-    for (let i = 0; i < hand.hand.length; i++) amount[types.indexOf(hand.hand[i])] += 1;
-    if (amount.includes(5)) score = "7";
-    else if (amount.includes(4)) score = "6";
-    else if (amount.includes(3) && amount.includes(2)) score = "5";
-    else if (amount.includes(3)) score = "4";
-    else if (amount.filter(num => num === 2).length === 2) score = "3";
-    else if (amount.includes(2)) score = "2";
-    for (let i = 0; i < hand.hand.length; i++) score += 30 - types.indexOf(hand.hand[i]);
+  function findScore(hand: string, joker: boolean): number {
+    const types: Array<string> = joker ? ["A","K","Q","T","9","8","7","6","5","4","3","2","J"] : ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+    let amount: Array<number> = new Array(types.length).fill(0);
+    for (let i = 0; i < hand.length; i++) amount[types.indexOf(hand[i])] += 1;
+    if (joker) {
+      let jokers: number = amount[types.indexOf("J")];
+      amount[types.indexOf("J")] = 0;
+      amount[amount.indexOf(Math.max(...amount))] += jokers;
+    }
+    let score: string = initalScore(amount);
+    for (let i = 0; i < hand.length; i++) score += 30 - types.indexOf(hand[i]);
     return parseInt(score);
   }
-  function findJokerScore(hand: HandM): number {
-    let score: string = "1";
-    const types: Array<string> = ["A","K","Q","T","9","8","7","6","5","4","3","2","J"];
-    let amount: Array<number> = [0,0,0,0,0,0,0,0,0,0,0,0,0];
-    for (let i = 0; i < hand.hand.length; i++) amount[types.indexOf(hand.hand[i])] += 1;
-    let jokers: number = amount[12];
-    amount[12] = 0;
-    amount[amount.indexOf(Math.max(...amount))] += jokers;
-    if (amount.includes(5)) score = "7";
-    else if (amount.includes(4)) score = "6";
-    else if (amount.includes(3) && amount.includes(2)) score = "5";
-    else if (amount.includes(3)) score = "4";
-    else if (amount.filter(num => num === 2).length === 2) score = "3";
-    else if (amount.includes(2)) score = "2";
-    for (let i = 0; i < hand.hand.length; i++) score += 30 - types.indexOf(hand.hand[i]);
-    return parseInt(score);
+  function initalScore(amount: Array<number>): string {
+    if (amount.includes(5)) return "7";
+    if (amount.includes(4)) return "6";
+    if (amount.includes(3) && amount.includes(2)) return "5";
+    if (amount.includes(3)) return "4";
+    if (amount.filter(num => num === 2).length === 2) return "3";
+    if (amount.includes(2)) return "2";
+    return "1";
   }
 
   return (
