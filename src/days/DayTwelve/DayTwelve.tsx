@@ -3,54 +3,54 @@ import { dayTwelveExample } from './example_data';
 
 interface SpringM {
   damaged: Array<number>;
-  condition: Array<number>;
+  condition: string;
 }
 
 function DayTwelve() {
   const data: Array<string> = dayTwelveData.split(/\r?\n/);
   const exampleData: Array<string> = dayTwelveExample.split(/\r?\n/);
+  let dictionary: { [key: string]: number } = {};
 
   /**
-   * Part 1: time 00:00:00 - rank 0000
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 1: time 00:38:20 - rank 2613
+   * Part 2: time 07:37:00 - rank 6444
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
-    if (partOne) {
-      const springs: Array<SpringM> = a.map(line => {
-        return {
-          damaged: line.split(" ")[1].split(",").map(val => parseInt(val)),
-          condition: line.split(" ")[0].split("").map(val => val === "?" ? -1 : (val === "." ? 0 : 1))
-        };
-      });
+    let springs: Array<SpringM> = a.map(line => {
+      return {
+        damaged: line.split(" ")[1].split(",").map(val => parseInt(val)),
+        condition: line.split(" ")[0]
+      };
+    });
+    if (partOne)
       return springs.map(spring => arrangements(spring)).reduce((a, b) => a + b, 0).toString();
-    }
-    return "";
+    return springs.map(spring => arrangements({
+      condition: [spring.condition, spring.condition, spring.condition, spring.condition, spring.condition].join("?"),
+      damaged: [...spring.damaged, ...spring.damaged, ...spring.damaged, ...spring.damaged, ...spring.damaged]
+    })).reduce((a, b) => a + b, 0).toString();
   }
   function arrangements(spring: SpringM): number {
-    return arrange([], spring, 0).filter(pos => pos).length;
-  }
-  function arrange(condition: Array<number>, spring: SpringM, index: number): Array<boolean> {
-    if (condition.length === spring.condition.length)
-      return [possible(condition, spring.damaged)];
-    if (spring.condition[index] >= 0)
-      return arrange([...condition, spring.condition[index]], spring, index + 1);
-    return [...arrange([...condition, 0], spring, index + 1), ...arrange([...condition, 1], spring, index + 1)];
-  }
-  function possible(condition: Array<number>, damaged: Array<number>): boolean {
-    let pairs: Array<number> = [0];
-    for (let i = 0; i < condition.length; i++) {
-      if (condition[i] === 0) pairs.push(0);
-      else pairs[pairs.length - 1] += 1;
+    const key: string = spring.condition + spring.damaged.join(",");
+    if (key in dictionary) return dictionary[key];
+    if (spring.condition.length === 0) {
+      if (spring.damaged.length === 0) return (dictionary[key] = 1);
+      return (dictionary[key] = 0);
     }
-    return equals(pairs.filter(p => p > 0), damaged);
-  }
-  function equals(a: Array<number>, b: Array<number>): boolean {
-    if (a.length === b.length) {
-      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-      return true;
+    if (spring.damaged.length === 0) {
+      for (let i = 0; i < spring.condition.length; i++) if (spring.condition[i] === "#") return (dictionary[key] = 0);
+      return (dictionary[key] = 1);
     }
-    return false;
+    if (spring.condition.length < spring.damaged.reduce((a, b) => a + b, 0) + spring.damaged.length - 1) return (dictionary[key] = 0);
+    if (spring.condition[0] === ".") return (dictionary[key] = arrangements({ condition: spring.condition.slice(1), damaged: spring.damaged }));
+    if (spring.condition[0] === "#") {
+      let damage: number = spring.damaged[0];
+      for (let i = 0; i < damage; i++) if (spring.condition[i] === ".") return (dictionary[key] = 0);
+      if (spring.condition[damage] === "#") return (dictionary[key] = 0);
+      return (dictionary[key] = arrangements({ condition: spring.condition.slice(damage + 1), damaged: spring.damaged.slice(1) }));
+    }
+    return (dictionary[key] = arrangements({ condition: spring.condition.slice(1), damaged: spring.damaged })
+      + arrangements({ condition: "#" + spring.condition.slice(1), damaged: spring.damaged }));
   }
 
   return (
@@ -66,4 +66,3 @@ function DayTwelve() {
 }
 
 export default DayTwelve;
-//
