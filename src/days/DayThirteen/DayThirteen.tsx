@@ -11,7 +11,7 @@ function DayThirteen() {
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
-    const patterns: Array<Array<string>> = [[]];
+    let patterns: Array<Array<string>> = [[]];
     for (let i = 0; i < a.length; i++) {
       if (a[i] === "") patterns.push([]);
       else patterns[patterns.length - 1].push(a[i]);
@@ -26,16 +26,15 @@ function DayThirteen() {
     return reflectionPoint(pattern, errors) * 100 + reflectionPoint(mirrored, errors);
   }
   function reflectionPoint(pattern: Array<string>, errors: number): number {
-    for (let i = 0.5; i < pattern.length - 1; i += 0.5) {
+    for (let i = 0.5; i < pattern.length - 1; i += 0.5)
       if (mirrors(pattern, Math.floor(i), Math.floor(i + 1), 0, errors))
         return Math.floor(i + 1);
-    }
     return 0;
   }
   function mirrors(pattern: Array<string>, low: number, high: number, errors: number, maxErrors: number): boolean {
     if (low < 0 || high >= pattern.length) return errors === maxErrors;
     if (pattern[low] === pattern[high]) return mirrors(pattern, low - 1, high + 1, errors, maxErrors);
-    let totalErrors = errors += differences(pattern[low], pattern[high]);
+    let totalErrors = errors + differences(pattern[low], pattern[high]);
     if (totalErrors > maxErrors) return false;
     return mirrors(pattern, low - 1, high + 1, totalErrors, maxErrors);
   }
