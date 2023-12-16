@@ -21,10 +21,11 @@ function DaySixteen() {
   const data: Array<string> = daySixteenData.split(/\r?\n/);
   const exampleData: Array<string> = daySixteenExample.split(/\r?\n/);
   let width: number = 0, height: number = 0;
+  let sims: number = 0;
 
   /**
-   * Part 1: time 00:00:00 - rank 0000
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 1: time 02:17:51 - rank 6309
+   * Part 2: time 02:34:10 - rank 5978
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
@@ -32,12 +33,19 @@ function DaySixteen() {
     let items: Array<ItemM> = [];
     for (let x = 0; x < width; x++) for (let y = 0; y < height; y++) if (a[y][x] !== ".") items.push({ x: x, y: y, type: a[y][x] });
     if (partOne)
-      return simulate(items).toString();
-    return "";
+      return simulate(beamify(0, 0, 1, 0), items).toString();
+    let starts: Array<BeamM> = [];
+    for (let x = 0; x < width; x++) { starts.push(beamify(x, 0, 0, 1)); starts.push(beamify(x, height - 1, 0, -1)); }
+    for (let y = 0; y < height; y++) { starts.push(beamify(0, y, 1, 0)); starts.push(beamify(width - 1, y, -1, 0)); }
+    sims = 0;
+    let final: Array<number> = starts.map(start => simulate(start, items));
+    return Math.max(...final).toString();
   }
-  function simulate(items: Array<ItemM>): number {
-    let beams: Array<BeamM> = [{ x: 0, y: 0, dir: { x: 1, y: 0 }, key: "0,0,1,0" }];
-    if (items[0].x === 0 && items[0].y === 0) beams = turn(beams[0], items[0].type);
+  function simulate(start: BeamM, items: Array<ItemM>): number {
+    console.log((sims++) + "/" + (width + height) * 2);
+    let beams: Array<BeamM> = [start];
+    let item: ItemM | undefined = items.find(i => i.x === start.x && i.y === start.y);
+    if (item) beams = turn(beams[0], item.type);
     let history: Array<CoordsM> = move(beams, items, []).map(h => {
       return {
         x: parseInt(h.split(",")[0]),
@@ -108,4 +116,3 @@ function DaySixteen() {
 }
 
 export default DaySixteen;
-//
