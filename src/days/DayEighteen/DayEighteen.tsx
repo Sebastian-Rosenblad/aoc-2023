@@ -30,7 +30,7 @@ function DayEighteen() {
 
   /**
    * Part 1: time     >24h - rank 27801
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 2: time     >24h - rank 22890
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
