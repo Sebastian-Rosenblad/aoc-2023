@@ -18,6 +18,12 @@ interface PartM {
   a: number;
   s: number;
 }
+interface RangeM {
+  x: { min: number; max: number; };
+  m: { min: number; max: number; };
+  a: { min: number; max: number; };
+  s: { min: number; max: number; };
+}
 
 function DayNineteen() {
   const data: Array<string> = dayNineteenData.split(/\r?\n/);
@@ -26,7 +32,7 @@ function DayNineteen() {
 
   /**
    * Part 1: time     >24h - rank 27896
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 2: time     >24h - rank 20891
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
@@ -42,7 +48,12 @@ function DayNineteen() {
       });
       return parts.filter(part => TestPart(part, dictionary["in"])).map(part => part.x + part.m + part.a + part.s).reduce((a, b) => a + b, 0) + " (" + (Date.now() - time) + ")";
     }
-    return "(" + (Date.now() - time) + ")";
+    return TestRange({
+      x: { min: 1, max: 4000 },
+      m: { min: 1, max: 4000 },
+      a: { min: 1, max: 4000 },
+      s: { min: 1, max: 4000 }
+    }, dictionary["in"]) + " (" + (Date.now() - time) + ")";
   }
   function ParseWorkflows(lines: Array<string>): Array<WorkflowM> {
     return lines.map(line => {
@@ -96,6 +107,37 @@ function DayNineteen() {
   function TestRule(part: PartM, rule: RuleM): boolean {
     if (rule.comp === "<") return part[rule.type] < rule.value;
     return part[rule.type] > rule.value;
+  }
+  function TestRange(range: RangeM, workflow: WorkflowM): number {
+    let count: number = 0;
+    let current: RangeM = JSON.parse(JSON.stringify(range));
+    for (let i = 0; i < workflow.rules.length; i++) {
+      const rule: RuleM = workflow.rules[i];
+      let split: RangeM = JSON.parse(JSON.stringify(current));
+      split[rule.type] = {
+        min: rule.comp === ">" ? (current[rule.type].min < rule.value + 1 ? rule.value + 1 : current[rule.type].min) : current[rule.type].min,
+        max: rule.comp === "<" ? (current[rule.type].max > rule.value - 1 ? rule.value - 1 : current[rule.type].max) : current[rule.type].max
+      };
+      if (split[rule.type].min <= split[rule.type].max) {
+        current[rule.type] = {
+          min: rule.comp === "<" ? rule.value : current[rule.type].min,
+          max: rule.comp === ">" ? rule.value : current[rule.type].max
+        };
+        if (current[rule.type].min > current[rule.type].max) {
+          if (rule.result === "A") return count + SumRange(split);
+          if (rule.result === "R") return count;
+          return count + TestRange(split, dictionary[rule.result]);
+        }
+        if (rule.result === "A") count += SumRange(split);
+        else if (rule.result !== "R") count += TestRange(split, dictionary[rule.result]);
+      }
+    }
+    if (workflow.default === "A") return count + SumRange(current);
+    if (workflow.default === "R") return count;
+    return count + TestRange(current, dictionary[workflow.default]);
+  }
+  function SumRange(r: RangeM): number {
+    return (r.x.max - r.x.min + 1) * (r.m.max - r.m.min + 1) * (r.a.max - r.a.min + 1) * (r.s.max - r.s.min + 1);
   }
 
   return (
