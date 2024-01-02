@@ -1,1 +1,11 @@
-export const dayTwentyoneExample:string=``;
+export const dayTwentyoneExample:string=`...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#.#....
+.##..S####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........`;
