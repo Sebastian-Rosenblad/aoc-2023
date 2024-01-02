@@ -24,7 +24,7 @@ function DayTwenty() {
 
   /**
    * Part 1: time     >24h - rank 21305
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 2: time     >24h - rank 17277
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
