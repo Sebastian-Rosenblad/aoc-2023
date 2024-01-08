@@ -5,8 +5,10 @@ interface BrickM {
   start: CoordsM;
   end: CoordsM;
   id: string;
-  supports: Array<string>;
+  supports: Array<{ id: string; supporters: number; }>;
   supportedBy: number;
+  falls: number;
+  fallSupports: Array<string>;
 }
 interface CoordsM {
   x: number;
@@ -21,6 +23,7 @@ interface HeightM {
 function DayTwentytwo() {
   const data: Array<string> = dayTwentytwoData.split(/\r?\n/);
   const exampleData: Array<string> = dayTwentytwoExample.split(/\r?\n/);
+  let dictionary: { [key: string]: BrickM };
 
   /**
    * Part 1: time     >24h - rank 15988
@@ -30,6 +33,8 @@ function DayTwentytwo() {
   function calculate(a: Array<string>, partOne: boolean): string {
     const time: number = Date.now();
     let bricks: Array<BrickM> = a.map((line, i) => ParseBrick(line, i)).sort((a, b) => a.start.z - b.start.z);
+    dictionary = {};
+    bricks.forEach(brick => dictionary[brick.id] = brick);
     const tx: Array<number> = bricks.map(brick => [brick.start.x, brick.end.x]).flat(), ty: Array<number> = bricks.map(brick => [brick.start.y, brick.end.y]).flat();
     const width: number = Math.max(...tx) - Math.min(...tx) + 1, height: number = Math.max(...ty) - Math.min(...ty) + 1;
     let heightmap: Array<Array<HeightM>> = new Array(width).fill(-1).map(() => new Array(height).fill({ height: 0, brick: "" }));
@@ -39,23 +44,25 @@ function DayTwentytwo() {
       const height: number = Math.max(...heights.map(h => h.height));
       let land: Array<string> = heights.filter(h => h.height === height).map(h => h.brick);
       land = land.filter((brick, j) => j === land.indexOf(brick) && brick !== "");
-      bricks.filter(brick => land.includes(brick.id)).forEach(brick => brick.supports.push(bricks[i].id));
+      bricks.filter(brick => land.includes(brick.id)).forEach(brick => brick.supports.push({ id: bricks[i].id, supporters: land.length }));
       let brick: BrickM = bricks[i];
       brick.supportedBy = land.length;
       const tall: number = brick.end.z - brick.start.z + 1;
       area.forEach(coord => heightmap[coord.x][coord.y] = { height: height + tall, brick: bricks[i].id });
     }
-    let redundant: Array<BrickM> = bricks.filter(brick => {
+    if (partOne) return bricks.filter(brick => {
       if (brick.supports.length === 0) return true;
-      if (!brick.supports.map(support => bricks.find(b => b.id === support)?.supportedBy).includes(1)) return true;
+      if (!brick.supports.find(sup => sup.supporters === 1)) return true;
       return false;
-    });
-    return redundant.length + " (" + (Date.now() - time) + ")";
+    }).length + " (" + (Date.now() - time) + ")";
+    bricks.sort((a, b) => b.end.z - a.end.z).forEach(brick => [brick.falls, brick.fallSupports] = CalculateFalls(brick, [], true));
+    console.log(bricks);
+    return bricks.map(brick => brick.falls >= 0 ? brick.falls : 0).reduce((a, b) => a + b, 0) + " (" + (Date.now() - time) + ")";
   }
   function ParseBrick(line: string, index: number): BrickM {
     const coords: Array<string> = line.split("~");
     const one: CoordsM = ParseCoords(coords[0]), two: CoordsM = ParseCoords(coords[1]);
-    return { start: one, end: two, id: index.toString(), supports: [], supportedBy: 0 };
+    return { start: one, end: two, id: index.toString(), supports: [], supportedBy: 0, falls: -1, fallSupports: [] };
   }
   function ParseCoords(line: string): CoordsM {
     const values: Array<number> = line.split(",").map(n => parseInt(n));
@@ -67,6 +74,23 @@ function DayTwentytwo() {
       for (let j = brick.start.y; j <= brick.end.y; j++)
         area.push({ x: i, y: j, z: -1 });
     return area;
+  }
+  function CalculateFalls(brick: BrickM, fallens: Array<string>, original: boolean): [number, Array<string>] {
+    // 14951 too low
+    // 14958 not right
+    fallens = fallens.concat(brick.supports.map(support => support.id));
+    if (brick.falls >= 0) return [brick.falls, fallens.concat(brick.fallSupports)];
+    let falls: number = 0, uncalculable: boolean = false;
+    for (let i = 0; i < brick.supports.length; i++) {
+      const support: BrickM = dictionary[brick.supports[i].id];
+      if (fallens.filter(fallen => fallen === support.id).length < support.supportedBy) uncalculable = true;
+      else {
+        let supFalls: number = 0;
+        [supFalls, fallens] = CalculateFalls(support, fallens, false);
+        falls += 1 + (supFalls > 0 ? supFalls : 0);
+      }
+    }
+    return [(original && uncalculable) ? -1 : falls, fallens];
   }
 
   return (
