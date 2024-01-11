@@ -2,13 +2,12 @@ import { dayTwentytwoData } from './data';
 import { dayTwentytwoExample } from './example_data';
 
 interface BrickM {
+  id: string;
   start: CoordsM;
   end: CoordsM;
-  id: string;
   supports: Array<{ id: string; supporters: number; }>;
   supportedBy: number;
   falls: number;
-  fallSupports: Array<string>;
 }
 interface CoordsM {
   x: number;
@@ -27,7 +26,7 @@ function DayTwentytwo() {
 
   /**
    * Part 1: time     >24h - rank 15988
-   * Part 2: time 00:00:00 - rank 0000
+   * Part 2: time     >24h - rank 15666
    */
 
   function calculate(a: Array<string>, partOne: boolean): string {
@@ -55,14 +54,13 @@ function DayTwentytwo() {
       if (!brick.supports.find(sup => sup.supporters === 1)) return true;
       return false;
     }).length + " (" + (Date.now() - time) + ")";
-    bricks.sort((a, b) => b.end.z - a.end.z).forEach(brick => [brick.falls, brick.fallSupports] = CalculateFalls(brick, [], true));
-    console.log(bricks);
-    return bricks.map(brick => brick.falls >= 0 ? brick.falls : 0).reduce((a, b) => a + b, 0) + " (" + (Date.now() - time) + ")";
+    bricks.sort((a, b) => b.end.z - a.end.z).forEach(brick => [brick.falls] = CalculateFalls(brick, []));
+    return bricks.map(brick => brick.falls).reduce((a, b) => a + b, 0) + " (" + (Date.now() - time) + ")";
   }
   function ParseBrick(line: string, index: number): BrickM {
     const coords: Array<string> = line.split("~");
     const one: CoordsM = ParseCoords(coords[0]), two: CoordsM = ParseCoords(coords[1]);
-    return { start: one, end: two, id: index.toString(), supports: [], supportedBy: 0, falls: -1, fallSupports: [] };
+    return { start: one, end: two, id: index.toString(), supports: [], supportedBy: 0, falls: -1 };
   }
   function ParseCoords(line: string): CoordsM {
     const values: Array<number> = line.split(",").map(n => parseInt(n));
@@ -75,22 +73,18 @@ function DayTwentytwo() {
         area.push({ x: i, y: j, z: -1 });
     return area;
   }
-  function CalculateFalls(brick: BrickM, fallens: Array<string>, original: boolean): [number, Array<string>] {
-    // 14951 too low
-    // 14958 not right
+  function CalculateFalls(brick: BrickM, fallens: Array<string>): [number, Array<string>] {
     fallens = fallens.concat(brick.supports.map(support => support.id));
-    if (brick.falls >= 0) return [brick.falls, fallens.concat(brick.fallSupports)];
-    let falls: number = 0, uncalculable: boolean = false;
+    let falls: number = 0;
     for (let i = 0; i < brick.supports.length; i++) {
       const support: BrickM = dictionary[brick.supports[i].id];
-      if (fallens.filter(fallen => fallen === support.id).length < support.supportedBy) uncalculable = true;
-      else {
-        let supFalls: number = 0;
-        [supFalls, fallens] = CalculateFalls(support, fallens, false);
-        falls += 1 + (supFalls > 0 ? supFalls : 0);
+      if (fallens.filter(fallen => fallen === support.id).length >= support.supportedBy) {
+        let newFalls: number = 0;
+        [newFalls, fallens] = CalculateFalls(support, fallens);
+        falls += 1 + newFalls;
       }
     }
-    return [(original && uncalculable) ? -1 : falls, fallens];
+    return [falls, fallens];
   }
 
   return (
