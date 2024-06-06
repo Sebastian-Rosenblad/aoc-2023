@@ -3,14 +3,12 @@ import { dayTwentythreeData } from './data';
 import { dayTwentythreeExample } from './example_data';
 
 interface TrailM {
-  id: string;
   start: CoordM;
   end: CoordM;
   length: number;
   splits: Array<CoordM>;
-  splitTrails: Array<TrailM>;
 }
-interface TrailStartM {
+interface CheckM {
   from: CoordM;
   start: CoordM;
 }
@@ -26,9 +24,7 @@ interface CoordM {
 let ids: Array<string> = [];
 function GetID(): string {
   let newid: string;
-  do {
-    newid = Math.random().toString(16).slice(2, 5);
-  } while (ids.includes(newid));
+  do { newid = Math.random().toString(16).slice(2, 5); } while (ids.includes(newid));
   return newid;
 }
 
@@ -43,19 +39,21 @@ function DayTwentythree() {
 
   function calculate(a: Array<string>, partOne: boolean): string {
     const time: number = Date.now();
-    /*const map: Array<Array<string>> = a.map(line => line.split(""));
-    const start: number = map[0].indexOf(".");
-    let trails: Array<TrailM> = [], starts: Array<TrailStartM> = [{ from: { x: start, y: 0 }, start: { x: start, y: 1 } }];
-    while (starts.length > 0) {
-      const origin: TrailStartM | undefined = starts.shift();
-      if (origin !== undefined && !trails.find(trail => Equals(trail.start, origin.start))) {
-        const newTrail: TrailM = FindTrail(origin.from, origin.start, trails.length, map, partOne);
+    const map: Array<Array<string>> = a.map(line => line.split(""));
+    const startx: number = map[0].indexOf(".");
+    let trails: Array<TrailM> = [], checks: Array<CheckM> = [{ from: { x: startx, y: 0 }, start: { x: startx, y: 1 } }];
+    while (checks.length > 0) {
+      const check: CheckM | undefined = checks.shift();
+      if (check !== undefined && !trails.find(trail => Equals(trail.start, check.start))) {
+        const newTrail: TrailM = FindTrail(check.from, check.start, map, partOne);
         trails.push(newTrail);
-        newTrail.splits.forEach(split => starts.push({ from: newTrail.end, start: split }));
+        newTrail.splits.forEach(split => checks.push({ from: newTrail.end, start: split }));
       }
     }
-    if (!partOne) trails = trails.filter(trail => trail.end.x !== start && trail.end.y !== 0);
-    trails.forEach(trail => trail.splitTrails = trail.splits.map(coord =>  trails.find(t => Equals(t.start, coord)) || { id: "-1" } as TrailM).filter(t => t.id !== "-1"));
+    const minlength: number = trails.filter(trail => trail.splits.length === 0).reduce((a, b) => a + b.length, 0);
+    const nodes: Array<NodeM> = GetNodes(trails.filter(trail => !Equals(trail.end, { x: startx, y: 0 })));
+    console.log(trails, minlength);
+    /*trails.forEach(trail => trail.splitTrails = trail.splits.map(coord =>  trails.find(t => Equals(t.start, coord)) || { id: "-1" } as TrailM).filter(t => t.id !== "-1"));
     let trecks: Array<Array<TrailM>> = [[trails[0]]];
     let completed: Array<Array<TrailM>> = [];
     let count: number = 0;
@@ -81,7 +79,7 @@ function DayTwentythree() {
     return Math.max(...completed.map(treck => treck.reduce((a, b) => a + b.length, 0))) + " (" + (Date.now() - time) + ")";*/
     return " (" + (Date.now() - time) + ")";
   }
-  /*function FindTrail(from: CoordM, start: CoordM, index: number, map: Array<Array<string>>, partOne: boolean): TrailM {
+  function FindTrail(from: CoordM, start: CoordM, map: Array<Array<string>>, partOne: boolean): TrailM {
     let walked: Array<CoordM> = [from], nexts: Array<CoordM> = [start];
     while (nexts.length === 1) {
       const next: CoordM = nexts[0];
@@ -98,17 +96,23 @@ function DayTwentythree() {
       walked.push(next);
     }
     return {
-      id: GetID(),
       start: start,
       end: walked[walked.length - 1],
       length: walked.length - 1,
-      splits: nexts,
-      splitTrails: []
+      splits: nexts
     };
   }
-  function Equals(a: CoordM, b: CoordM): boolean {
-    return a.x === b.x && a.y === b.y;
-  }*/
+  function GetNodes(trails: Array<TrailM>): Array<NodeM> {
+    let uniques: Array<CoordM> = trails.map(trail => trail.end);
+    uniques = uniques.filter((unique, i) => uniques.findIndex(u => Equals(unique, u)) === i);
+    let nodes: Array<NodeM> = [];
+    uniques.forEach(unique => {
+      const connections: Array<TrailM> = trails.filter(trail => Equals(unique, trail.end));
+      console.log(unique, connections);
+    });
+    return nodes;
+  }
+  let Equals = (a: CoordM, b: CoordM): boolean => a.x === b.x && a.y === b.y;
 
   return (
     <div className='day-twentythree'>
